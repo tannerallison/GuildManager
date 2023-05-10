@@ -54,16 +54,20 @@ namespace GuildManager.Controllers
             return minion;
         }
 
+
         // PUT: api/Minion/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMinion(int id, Minion minion)
+        public async Task<IActionResult> HireMinion(int id)
         {
-            if (id != minion.Id)
+            var player = Request.HttpContext.Items["Player"] as Player;
+            var minion = _context.Minions.FirstOrDefault(m=>m.Id == id);
+            if (minion.BossId.HasValue && minion.BossId.Value != player.Id)
             {
-                return BadRequest();
+                return Conflict();
             }
 
+            minion.BossId = player.Id;
             _context.Entry(minion).State = EntityState.Modified;
 
             try
@@ -84,6 +88,37 @@ namespace GuildManager.Controllers
 
             return NoContent();
         }
+        //
+        // // PUT: api/Minion/5
+        // // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // [HttpPut("{id}")]
+        // public async Task<IActionResult> PutMinion(int id, Minion minion)
+        // {
+        //     if (id != minion.Id)
+        //     {
+        //         return BadRequest();
+        //     }
+        //
+        //     _context.Entry(minion).State = EntityState.Modified;
+        //
+        //     try
+        //     {
+        //         await _context.SaveChangesAsync();
+        //     }
+        //     catch (DbUpdateConcurrencyException)
+        //     {
+        //         if (!MinionExists(id))
+        //         {
+        //             return NotFound();
+        //         }
+        //         else
+        //         {
+        //             throw;
+        //         }
+        //     }
+        //
+        //     return NoContent();
+        // }
 
         // POST: api/Minion
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -100,6 +135,8 @@ namespace GuildManager.Controllers
 
             return CreatedAtAction("GetMinion", new { id = minion.Id }, minion);
         }
+
+
 
         // DELETE: api/Minion/5
         [HttpDelete("{id}")]
