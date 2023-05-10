@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GuildManager;
+using GuildManager.Filters;
 using GuildManager.Models;
 
 namespace GuildManager.Controllers
 {
+    [ServiceFilter(typeof(ApiKeyAuthAttribute))]
     [Route("api/[controller]")]
     [ApiController]
     public class MinionController : ControllerBase
@@ -25,10 +27,11 @@ namespace GuildManager.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Minion>>> GetMinions()
         {
-          if (_context.Minions == null)
-          {
-              return NotFound();
-          }
+            if (_context.Minions == null)
+            {
+                return NotFound();
+            }
+
             return await _context.Minions.ToListAsync();
         }
 
@@ -36,10 +39,11 @@ namespace GuildManager.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Minion>> GetMinion(int id)
         {
-          if (_context.Minions == null)
-          {
-              return NotFound();
-          }
+            if (_context.Minions == null)
+            {
+                return NotFound();
+            }
+
             var minion = await _context.Minions.FindAsync(id);
 
             if (minion == null)
@@ -86,10 +90,11 @@ namespace GuildManager.Controllers
         [HttpPost]
         public async Task<ActionResult<Minion>> PostMinion(Minion minion)
         {
-          if (_context.Minions == null)
-          {
-              return Problem("Entity set 'GMContext.Minions'  is null.");
-          }
+            if (_context.Minions == null)
+            {
+                return Problem("Entity set 'GMContext.Minions'  is null.");
+            }
+
             _context.Minions.Add(minion);
             await _context.SaveChangesAsync();
 
@@ -104,6 +109,7 @@ namespace GuildManager.Controllers
             {
                 return NotFound();
             }
+
             var minion = await _context.Minions.FindAsync(id);
             if (minion == null)
             {

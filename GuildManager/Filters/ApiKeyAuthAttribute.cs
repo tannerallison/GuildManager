@@ -3,15 +3,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GuildManager.Filters;
 
-public class ApiKeyAuthAttribute : Attribute, IAsyncActionFilter
+public class ApiKeyAuthAttribute : IAsyncActionFilter
 {
     private const string ApiKeyHeaderName = "ApiKey";
 
-    private readonly IServiceProvider _serviceProvider;
+    private readonly GMContext _dbcontext;
 
-    public ApiKeyAuthAttribute(IServiceProvider serviceProvider)
+    public ApiKeyAuthAttribute(GMContext dbcontext)
     {
-        _serviceProvider = serviceProvider;
+        _dbcontext = dbcontext;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -22,8 +22,7 @@ public class ApiKeyAuthAttribute : Attribute, IAsyncActionFilter
             return;
         }
 
-        var gmContext = _serviceProvider.GetService<GMContext>();
-        var player = gmContext?.Players.FirstOrDefault(p => p.ApiKey == apiKey);
+        var player = _dbcontext?.Players.FirstOrDefault(p => p.ApiKey == apiKey.ToString());
 
         if (player == null)
         {
