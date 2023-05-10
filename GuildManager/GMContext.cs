@@ -14,4 +14,5 @@ public class GMContext : DbContext
     public DbSet<Minion> Minions { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
+    public DbSet<Player> Players { get; set;}
 }
