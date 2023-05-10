@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GuildManager.Filters;
 
-public class ApiKeyAuthAttribute : IAsyncActionFilter
+public class ApiKeyAuth : IAsyncActionFilter
 {
     private const string ApiKeyHeaderName = "ApiKey";
 
     private readonly GMContext _dbcontext;
 
-    public ApiKeyAuthAttribute(GMContext dbcontext)
+    public ApiKeyAuth(GMContext dbcontext)
     {
         _dbcontext = dbcontext;
     }

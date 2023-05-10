@@ -11,7 +11,7 @@ using GuildManager.Models;
 
 namespace GuildManager.Controllers
 {
-    [ServiceFilter(typeof(ApiKeyAuthAttribute))]
+    [ServiceFilter(typeof(ApiKeyAuth))]
     [Route("api/[controller]")]
     [ApiController]
     public class MinionController : ControllerBase

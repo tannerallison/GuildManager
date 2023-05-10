@@ -16,7 +16,7 @@ builder.Services.AddDbContext<GMContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<ApiKeyAuthAttribute>();
+builder.Services.AddScoped<ApiKeyAuth>();
 
 var app = builder.Build();
 

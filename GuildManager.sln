@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuildManager", "GuildManager\GuildManager.csproj", "{2BEF1562-CD3E-4479-9D41-D206C4E7F4DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuildManager.Tests", "GuildManager.Tests\GuildManager.Tests.csproj", "{D430D22C-F48D-4DB1-9B1A-35090A5E6CC3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{2BEF1562-CD3E-4479-9D41-D206C4E7F4DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BEF1562-CD3E-4479-9D41-D206C4E7F4DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BEF1562-CD3E-4479-9D41-D206C4E7F4DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D430D22C-F48D-4DB1-9B1A-35090A5E6CC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D430D22C-F48D-4DB1-9B1A-35090A5E6CC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D430D22C-F48D-4DB1-9B1A-35090A5E6CC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D430D22C-F48D-4DB1-9B1A-35090A5E6CC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
