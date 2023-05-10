@@ -10,4 +10,6 @@ public class Player
     public int Id { get; set; }
     public string ApiKey { get; set; }
     public string UserName { get; set; }
+
+    public ICollection<Minion> Minions  { get; set; } = new List<Minion>();
 }
