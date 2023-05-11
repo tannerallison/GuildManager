@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿#nullable disable
 
-#nullable disable
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace GuildManager.Migrations
+namespace GuildManager.Data.Migrations
 {
     /// <inheritdoc />
     public partial class AddPlayer : Migration

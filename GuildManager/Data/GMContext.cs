@@ -1,7 +1,7 @@
 ﻿using GuildManager.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace GuildManager;
+namespace GuildManager.Data;
 
 public class GMContext : DbContext
 {
