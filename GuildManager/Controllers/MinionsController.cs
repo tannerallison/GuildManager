@@ -12,7 +12,6 @@ using GuildManager.Models;
 
 namespace GuildManager.Controllers;
 
-[ServiceFilter(typeof(ApiKeyAuth))]
 [Route("api/[controller]")]
 [ApiController]
 public class MinionsController : ControllerBase
@@ -24,27 +23,17 @@ public class MinionsController : ControllerBase
         _context = context;
     }
 
-    // GET: api/Minion
+    // GET: api/Minions
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Minion>>> GetMinions()
     {
-        if (_context.Minions == null)
-        {
-            return NotFound();
-        }
-
         return await _context.Minions.ToListAsync();
     }
 
-    // GET: api/Minion/5
+    // GET: api/Minions/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Minion>> GetMinion(int id)
     {
-        if (_context.Minions == null)
-        {
-            return NotFound();
-        }
-
         var minion = await _context.Minions.FindAsync(id);
 
         if (minion == null)
@@ -56,13 +45,14 @@ public class MinionsController : ControllerBase
     }
 
 
-    // PUT: api/Minion/5
+    // PATCH: api/Minions/5/hire
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
+    [ServiceFilter(typeof(ApiKeyAuth))]
+    [HttpPatch("{id}/hire")]
     public async Task<IActionResult> HireMinion(int id)
     {
         var player = Request.HttpContext.Items["Player"] as Player;
-        var minion = _context.Minions.FirstOrDefault(m=>m.Id == id);
+        var minion = _context.Minions.First(m => m.Id == id);
         if (minion.BossId.HasValue && minion.BossId.Value != player.Id)
         {
             return Conflict();
@@ -86,76 +76,6 @@ public class MinionsController : ControllerBase
                 throw;
             }
         }
-
-        return NoContent();
-    }
-    //
-    // // PUT: api/Minion/5
-    // // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    // [HttpPut("{id}")]
-    // public async Task<IActionResult> PutMinion(int id, Minion minion)
-    // {
-    //     if (id != minion.Id)
-    //     {
-    //         return BadRequest();
-    //     }
-    //
-    //     _context.Entry(minion).State = EntityState.Modified;
-    //
-    //     try
-    //     {
-    //         await _context.SaveChangesAsync();
-    //     }
-    //     catch (DbUpdateConcurrencyException)
-    //     {
-    //         if (!MinionExists(id))
-    //         {
-    //             return NotFound();
-    //         }
-    //         else
-    //         {
-    //             throw;
-    //         }
-    //     }
-    //
-    //     return NoContent();
-    // }
-
-    // POST: api/Minion
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<Minion>> PostMinion(Minion minion)
-    {
-        if (_context.Minions == null)
-        {
-            return Problem("Entity set 'GMContext.Minions'  is null.");
-        }
-
-        _context.Minions.Add(minion);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetMinion", new { id = minion.Id }, minion);
-    }
-
-
-
-    // DELETE: api/Minion/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMinion(int id)
-    {
-        if (_context.Minions == null)
-        {
-            return NotFound();
-        }
-
-        var minion = await _context.Minions.FindAsync(id);
-        if (minion == null)
-        {
-            return NotFound();
-        }
-
-        _context.Minions.Remove(minion);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

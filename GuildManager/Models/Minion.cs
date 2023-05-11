@@ -14,4 +14,5 @@ public class Minion
     public Player? Boss { get; set; }
 
     public ICollection<Job> Jobs { get; } = new List<Job>();
+
 }

@@ -19,11 +19,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ApiKeyAuth>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    DbInitializer.CreateDbIfNotExists(app);
     app.UseSwagger();
     app.UseSwaggerUI();
 }
