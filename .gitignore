@@ -6,3 +6,8 @@ riderModule.iml
 .idea/
 
 app.db*
+
+*credentials.json
+
+.terraform.lock.hcl
+terraform-provider*
