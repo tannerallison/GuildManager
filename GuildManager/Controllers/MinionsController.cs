@@ -16,13 +16,22 @@ public class MinionsController : ControllerBase
         _context = context;
     }
 
+    /// <summary>
+    /// Retrieves all minions that are not currently employed.
+    /// </summary>
+    /// <returns></returns>
     // GET: api/Minions
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Minion>>> GetMinions()
     {
-        return await _context.Minions.Except(_context.Assignments.Select(a => a.Minion)).ToListAsync();
+        return await _context.Minions.Where(m=>m.BossId == null).ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves a single, unemployed minion.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     // GET: api/Minions/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Minion>> GetMinion(int id)

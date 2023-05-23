@@ -10,4 +10,6 @@ public class Minion : BaseEntity
     [JsonIgnore] public Player? Boss { get; set; }
 
     public ICollection<Job> Jobs { get; } = new List<Job>();
+
+    public bool OnAJob() => Jobs.Count > 0;
 }

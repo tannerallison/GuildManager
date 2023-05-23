@@ -16,6 +16,10 @@ public class MyMinionsController : AuthorizedController
     }
 
     // GET: api/Minion
+    /// <summary>
+    /// Returns all minions belonging to the current player.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Minion>>> GetMinions()
     {
@@ -25,6 +29,11 @@ public class MyMinionsController : AuthorizedController
         return await Context.Minions.Where(m => m.BossId == player.Id).ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves a single minion belonging to the current player.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     // GET: api/Minion/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Minion>> GetMinion(Guid id)
@@ -40,17 +49,25 @@ public class MyMinionsController : AuthorizedController
         return minion;
     }
 
+    /// <summary>
+    /// Removes a minion from the current players employ and puts them back in the pool of available minions.
+    /// Player cannot fire a minion that is currently on a Job.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     // GET: api/Minion/5
-    [HttpPatch("{id}/fire")]
-    public async Task<ActionResult<Minion>> FireMinion(Guid id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> FireMinion(Guid id)
     {
         if (!TryGetPlayer(out var player))
             return new UnauthorizedResult();
 
-        var minion = await Context.Minions.FirstAsync<Minion?>(c => c.BossId == player.Id && c.Id == id);
-
+        var minion = player.Minions.FirstOrDefault(m => m.Id == id);
         if (minion == null)
-            return NotFound();
+            return new ForbidResult("Minion does not belong to player.");
+
+        if (minion.OnAJob())
+            return new ForbidResult("Minion is currently on a job.");
 
         minion.BossId = null;
         Context.Entry(minion).State = EntityState.Modified;
@@ -66,7 +83,7 @@ public class MyMinionsController : AuthorizedController
             throw;
         }
 
-        return minion;
+        return new OkResult();
     }
 
     private bool MinionExists(Guid id)
