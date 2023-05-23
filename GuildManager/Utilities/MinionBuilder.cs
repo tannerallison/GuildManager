@@ -4,7 +4,7 @@ namespace GuildManager.Utilities;
 
 public static class MinionBuilder
 {
-    public static IQueryable<Minion> OfPlayer(this IQueryable<Minion> queryable, int bossId)
+    public static IQueryable<Minion> OfPlayer(this IQueryable<Minion> queryable, Guid bossId)
     {
         return queryable.Where(x => x.BossId == bossId);
     }

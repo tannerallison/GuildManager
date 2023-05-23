@@ -5,14 +5,36 @@ namespace GuildManager.Data;
 
 public class GMContext : DbContext
 {
-    public GMContext(DbContextOptions options)
-        : base(options)
-    {
-
-    }
-
     public DbSet<Minion> Minions { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
-    public DbSet<Player> Players { get; set;}
+    public DbSet<Player> Players { get; set; }
+
+    public GMContext(DbContextOptions options) : base(options)
+    {
+    }
+
+    public override int SaveChanges()
+    {
+        AddTimeStamps();
+        return base.SaveChanges();
+    }
+
+    private void AddTimeStamps()
+    {
+        var entities = ChangeTracker.Entries()
+            .Where(x => x is { Entity: ITimeStampedEntity, State: EntityState.Added or EntityState.Modified });
+
+        foreach (var entity in entities)
+        {
+            var now = DateTime.UtcNow; // current datetime
+
+            if (entity.State == EntityState.Added)
+            {
+                ((BaseEntity)entity.Entity).CreatedAt = now;
+            }
+
+            ((BaseEntity)entity.Entity).UpdatedAt = now;
+        }
+    }
 }

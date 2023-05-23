@@ -1,4 +1,5 @@
 ﻿using GuildManager.Models;
+using GuildManager.Services;
 using GuildManager.Utilities;
 
 namespace GuildManager.Data;
@@ -13,7 +14,9 @@ public static class DbInitializer
             try
             {
                 var context = services.GetRequiredService<GMContext>();
-                Initialize(context);
+                var authenticationService = services.GetRequiredService<IAuthenticationService>();
+
+                Initialize(context, authenticationService);
             }
             catch (Exception ex)
             {
@@ -23,25 +26,25 @@ public static class DbInitializer
         }
     }
 
-    public static void Initialize(GMContext context)
+    public static void Initialize(GMContext context, IAuthenticationService authenticationService)
     {
         context.Database.EnsureCreated();
 
         if (context.Players.Any())
             return;
 
-        var players = new Player[]
+        var players = new AuthenticationRequest[]
         {
-            new() { UserName = "John" },
-            new() { UserName = "Jim" },
-            new() { UserName = "Jamie" },
-            new() { UserName = "Jenny" },
-            new() { UserName = "Jack" },
-            new() { UserName = "Jared" }
+            new() { Username = "John", Password = "john" },
+            new() { Username = "Jim", Password = "jim" },
+            new() { Username = "Jamie", Password = "jamie" },
+            new() { Username = "Jenny", Password = "jenny" },
+            new() { Username = "Jack", Password = "jack" },
+            new() { Username = "Jared", Password = "jared" }
         };
-        foreach (Player player in players)
+        foreach (AuthenticationRequest player in players)
         {
-            context.Players.Add(player);
+            authenticationService.Register(player);
         }
 
         context.SaveChanges();
@@ -55,6 +58,7 @@ public static class DbInitializer
                 context.Minions.Add(minion);
             }
         }
+
         context.SaveChanges();
     }
 }

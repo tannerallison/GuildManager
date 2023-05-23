@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using GuildManager;
 using GuildManager.Data;
-using GuildManager.Filters;
 using GuildManager.Models;
 
 namespace GuildManager.Controllers;
@@ -27,7 +20,7 @@ public class MinionsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Minion>>> GetMinions()
     {
-        return await _context.Minions.ToListAsync();
+        return await _context.Minions.Except(_context.Assignments.Select(a => a.Minion)).ToListAsync();
     }
 
     // GET: api/Minions/5
@@ -47,9 +40,8 @@ public class MinionsController : ControllerBase
 
     // PATCH: api/Minions/5/hire
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [ServiceFilter(typeof(ApiKeyAuth))]
     [HttpPatch("{id}/hire")]
-    public async Task<IActionResult> HireMinion(int id)
+    public async Task<IActionResult> HireMinion(Guid id)
     {
         var player = Request.HttpContext.Items["Player"] as Player;
         var minion = _context.Minions.First(m => m.Id == id);
@@ -80,7 +72,7 @@ public class MinionsController : ControllerBase
         return NoContent();
     }
 
-    private bool MinionExists(int id)
+    private bool MinionExists(Guid id)
     {
         return (_context.Minions?.Any(e => e.Id == id)).GetValueOrDefault();
     }

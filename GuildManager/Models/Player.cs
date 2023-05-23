@@ -1,15 +1,9 @@
 ﻿namespace GuildManager.Models;
 
-public class Player
+public class Player : BaseEntity
 {
-    public Player()
-    {
-        ApiKey = Guid.NewGuid().ToString();
-    }
+    public string Username { get; set; }
+    public Byte[] PasswordHash { get; set; }
 
-    public int Id { get; set; }
-    public string ApiKey { get; set; }
-    public string UserName { get; set; }
-
-    public ICollection<Minion> Minions  { get; set; } = new List<Minion>();
+    public ICollection<Minion> Minions { get; set; } = new List<Minion>();
 }
