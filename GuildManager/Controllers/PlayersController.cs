@@ -8,37 +8,34 @@ namespace GuildManager.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlayersController : ControllerBase
+public class PlayersController : AuthenticatedController
 {
-    private readonly GMContext _context;
-
-    public PlayersController(GMContext context)
+    public PlayersController(GMContext context) : base(context)
     {
-        _context = context;
     }
 
     // GET: api/Players
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Player>>> GetPlayers()
     {
-        if (_context.Players == null)
+        if (Context.Players == null)
         {
             return NotFound();
         }
 
-        return await _context.Players.ToListAsync();
+        return await Context.Players.ToListAsync();
     }
 
     // GET: api/Players/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Player>> GetPlayer(Guid id)
     {
-        if (_context.Players == null)
+        if (Context.Players == null)
         {
             return NotFound();
         }
 
-        var player = await _context.Players.FindAsync(id);
+        var player = await Context.Players.FindAsync(id);
 
         if (player == null)
         {
@@ -58,11 +55,11 @@ public class PlayersController : ControllerBase
             return BadRequest();
         }
 
-        _context.Entry(player).State = EntityState.Modified;
+        Context.Entry(player).State = EntityState.Modified;
 
         try
         {
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -84,7 +81,7 @@ public class PlayersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Player>> PostPlayer(string username)
     {
-        if (_context.Players == null)
+        if (Context.Players == null)
         {
             return Problem("Entity set 'GMContext.Players'  is null.");
         }
@@ -94,14 +91,14 @@ public class PlayersController : ControllerBase
             return Problem("Username is required");
         }
 
-        if (_context.Players.Any(p => p.Username == username))
+        if (Context.Players.Any(p => p.Username == username))
         {
             return Problem("Username is already taken");
         }
 
         var player = new Player { Username = username };
-        _context.Players.Add(player);
-        await _context.SaveChangesAsync();
+        Context.Players.Add(player);
+        await Context.SaveChangesAsync();
 
         return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
     }
@@ -110,25 +107,25 @@ public class PlayersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePlayer(int id)
     {
-        if (_context.Players == null)
+        if (Context.Players == null)
         {
             return NotFound();
         }
 
-        var player = await _context.Players.FindAsync(id);
+        var player = await Context.Players.FindAsync(id);
         if (player == null)
         {
             return NotFound();
         }
 
-        _context.Players.Remove(player);
-        await _context.SaveChangesAsync();
+        Context.Players.Remove(player);
+        await Context.SaveChangesAsync();
 
         return NoContent();
     }
 
     private bool PlayerExists(Guid id)
     {
-        return (_context.Players?.Any(e => e.Id == id)).GetValueOrDefault();
+        return (Context.Players?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

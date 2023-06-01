@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GuildManager.Controllers;
 
-[Authorize]
-public abstract class AuthorizedController : ControllerBase
+[Authenticate]
+public abstract class AuthenticatedController : ControllerBase
 {
     protected GMContext Context;
 
-    protected AuthorizedController(GMContext context)
+    protected AuthenticatedController(GMContext context)
     {
         Context = context;
     }

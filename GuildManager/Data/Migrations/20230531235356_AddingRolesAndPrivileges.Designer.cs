@@ -3,6 +3,7 @@ using System;
 using GuildManager.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,12 +11,41 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GuildManager.Data.Migrations
 {
     [DbContext(typeof(GMContext))]
-    partial class GMContextModelSnapshot : ModelSnapshot
+    [Migration("20230531235356_AddingRolesAndPrivileges")]
+    partial class AddingRolesAndPrivileges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
+
+            modelBuilder.Entity("GuildManager.Models.Assignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MinionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("MinionId");
+
+                    b.ToTable("Assignments");
+                });
 
             modelBuilder.Entity("GuildManager.Models.Job", b =>
                 {
@@ -191,6 +221,25 @@ namespace GuildManager.Data.Migrations
                     b.HasIndex("RolesId");
 
                     b.ToTable("PrivilegeRole");
+                });
+
+            modelBuilder.Entity("GuildManager.Models.Assignment", b =>
+                {
+                    b.HasOne("GuildManager.Models.Job", "Job")
+                        .WithMany()
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GuildManager.Models.Minion", "Minion")
+                        .WithMany()
+                        .HasForeignKey("MinionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+
+                    b.Navigation("Minion");
                 });
 
             modelBuilder.Entity("GuildManager.Models.Job", b =>

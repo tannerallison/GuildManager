@@ -3,6 +3,7 @@ using System;
 using GuildManager.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,12 +11,41 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GuildManager.Data.Migrations
 {
     [DbContext(typeof(GMContext))]
-    partial class GMContextModelSnapshot : ModelSnapshot
+    [Migration("20230523200517_AddingPatronToJob")]
+    partial class AddingPatronToJob
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
+
+            modelBuilder.Entity("GuildManager.Models.Assignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MinionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("MinionId");
+
+                    b.ToTable("Assignments");
+                });
 
             modelBuilder.Entity("GuildManager.Models.Job", b =>
                 {
@@ -98,56 +128,6 @@ namespace GuildManager.Data.Migrations
                     b.ToTable("Players");
                 });
 
-            modelBuilder.Entity("GuildManager.Models.Privilege", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Privileges");
-                });
-
-            modelBuilder.Entity("GuildManager.Models.Role", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("JobMinion", b =>
                 {
                     b.Property<Guid>("AssignedMinionsId")
@@ -163,34 +143,23 @@ namespace GuildManager.Data.Migrations
                     b.ToTable("JobMinion");
                 });
 
-            modelBuilder.Entity("PlayerRole", b =>
+            modelBuilder.Entity("GuildManager.Models.Assignment", b =>
                 {
-                    b.Property<Guid>("PlayersId")
-                        .HasColumnType("TEXT");
+                    b.HasOne("GuildManager.Models.Job", "Job")
+                        .WithMany()
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<Guid>("RolesId")
-                        .HasColumnType("TEXT");
+                    b.HasOne("GuildManager.Models.Minion", "Minion")
+                        .WithMany()
+                        .HasForeignKey("MinionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasKey("PlayersId", "RolesId");
+                    b.Navigation("Job");
 
-                    b.HasIndex("RolesId");
-
-                    b.ToTable("PlayerRole");
-                });
-
-            modelBuilder.Entity("PrivilegeRole", b =>
-                {
-                    b.Property<Guid>("PrivilegesId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("RolesId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("PrivilegesId", "RolesId");
-
-                    b.HasIndex("RolesId");
-
-                    b.ToTable("PrivilegeRole");
+                    b.Navigation("Minion");
                 });
 
             modelBuilder.Entity("GuildManager.Models.Job", b =>
@@ -222,36 +191,6 @@ namespace GuildManager.Data.Migrations
                     b.HasOne("GuildManager.Models.Job", null)
                         .WithMany()
                         .HasForeignKey("JobsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PlayerRole", b =>
-                {
-                    b.HasOne("GuildManager.Models.Player", null)
-                        .WithMany()
-                        .HasForeignKey("PlayersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GuildManager.Models.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PrivilegeRole", b =>
-                {
-                    b.HasOne("GuildManager.Models.Privilege", null)
-                        .WithMany()
-                        .HasForeignKey("PrivilegesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GuildManager.Models.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -61,4 +61,39 @@ public static class DbInitializer
 
         context.SaveChanges();
     }
+
+
+    public static void InitializePrivileges(GMContext context)
+    {
+        var privileges = new Privilege[]
+        {
+            new() { Code = $"{nameof(Player)}_create", Description = "Create Players" },
+            new() { Code = $"{nameof(Player)}_delete", Description = "Delete Players" },
+            new() { Code = $"{nameof(Minion)}_create", Description = "Create Minions" },
+            new() { Code = $"{nameof(Minion)}_delete", Description = "Delete Minions" },
+            new() { Code = $"{nameof(Minion)}_update", Description = "Update Minions" },
+            new() { Code = $"{nameof(Minion)}_hire", Description = "Hire Minions" },
+            new() { Code = $"{nameof(Job)}_create", Description = "Create Jobs" },
+            new() { Code = $"{nameof(Job)}_delete", Description = "Delete Jobs" }
+        };
+        foreach (var privilege in privileges)
+        {
+            if (context.Privileges.Any(p => p.Code == privilege.Code))
+                continue;
+            context.Privileges.Add(privilege);
+        }
+        context.SaveChanges();
+
+        var roles = new Role[]
+        {
+            new() { Code = "player", Description = "Player" },
+            new() { Code = "admin", Description = "Administator" }
+        };
+        foreach (var role in roles)
+        {
+            if (context.Roles.Any(r => r.Code == role.Code))
+                continue;
+            context.Roles.Add(role);
+        }
+    }
 }

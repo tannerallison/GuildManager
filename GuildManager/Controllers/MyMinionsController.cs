@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GuildManager.Controllers;
 
-[Authorize]
+// [Authorize]
 [Route("api/my/minions")]
 [ApiController]
-public class MyMinionsController : AuthorizedController
+public class MyMinionsController : AuthenticatedController
 {
     public MyMinionsController(GMContext context) : base(context)
     {
