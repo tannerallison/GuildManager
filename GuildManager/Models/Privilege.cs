@@ -1,8 +1,11 @@
-﻿namespace GuildManager.Models;
+﻿using Microsoft.EntityFrameworkCore;
 
-public class Privilege : BaseEntity
+namespace GuildManager.Models;
+
+[PrimaryKey("Code")]
+public class Privilege
 {
-    public string Code { get; set; }
+    public string Code { get; set; } = null!;
     public string Description { get; set; }
     public ICollection<Role> Roles { get; set; } = new List<Role>();
 }

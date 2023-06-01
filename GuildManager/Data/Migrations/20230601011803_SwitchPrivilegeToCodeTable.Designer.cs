@@ -3,6 +3,7 @@ using System;
 using GuildManager.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GuildManager.Data.Migrations
 {
     [DbContext(typeof(GMContext))]
-    partial class GMContextModelSnapshot : ModelSnapshot
+    [Migration("20230601011803_SwitchPrivilegeToCodeTable")]
+    partial class SwitchPrivilegeToCodeTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");

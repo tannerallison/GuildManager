@@ -86,7 +86,7 @@ public static class DbInitializer
 
         var roles = new Role[]
         {
-            new() { Code = "player", Description = "Player" },
+            new() { Code = "player", Description = "Player"},
             new() { Code = "admin", Description = "Administator" }
         };
         foreach (var role in roles)
