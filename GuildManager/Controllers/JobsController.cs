@@ -7,7 +7,7 @@ namespace GuildManager.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class JobsController : AuthenticatedController
+public class JobsController : AuthorizedController
 {
     public JobsController(GMContext context) : base(context)
     {

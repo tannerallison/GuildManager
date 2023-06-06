@@ -8,7 +8,7 @@ namespace GuildManager.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlayersController : AuthenticatedController
+public class PlayersController : AuthorizedController
 {
     public PlayersController(GMContext context) : base(context)
     {

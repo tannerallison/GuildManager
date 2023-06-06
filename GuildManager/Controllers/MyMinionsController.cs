@@ -9,7 +9,7 @@ namespace GuildManager.Controllers;
 // [Authorize]
 [Route("api/my/minions")]
 [ApiController]
-public class MyMinionsController : AuthenticatedController
+public class MyMinionsController : AuthorizedController
 {
     public MyMinionsController(GMContext context) : base(context)
     {

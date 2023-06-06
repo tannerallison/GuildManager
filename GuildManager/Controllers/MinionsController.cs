@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GuildManager.Data;
 using GuildManager.Models;
-using Microsoft.AspNetCore.Authorization;
+using GuildManager.Utilities;
 
 namespace GuildManager.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class MinionsController : AuthenticatedController
+public class MinionsController : AuthorizedController
 {
     public MinionsController(GMContext context) : base(context)
     {
@@ -47,7 +47,7 @@ public class MinionsController : AuthenticatedController
 
     // PATCH: api/Minions/5/hire
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [Authorize]
+    [Authorize(Privilege.MinionHire)]
     [HttpPatch("{id}/hire")]
     public async Task<IActionResult> HireMinion(Guid id)
     {

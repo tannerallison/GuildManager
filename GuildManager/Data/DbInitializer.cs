@@ -17,6 +17,7 @@ public static class DbInitializer
                 var authenticationService = services.GetRequiredService<IAuthenticationService>();
 
                 Initialize(context, authenticationService);
+                InitializePrivileges(context);
             }
             catch (Exception ex)
             {
@@ -65,35 +66,68 @@ public static class DbInitializer
 
     public static void InitializePrivileges(GMContext context)
     {
-        var privileges = new Privilege[]
+        var privileges = new dynamic[]
         {
-            new() { Code = $"{nameof(Player)}_create", Description = "Create Players" },
-            new() { Code = $"{nameof(Player)}_delete", Description = "Delete Players" },
-            new() { Code = $"{nameof(Minion)}_create", Description = "Create Minions" },
-            new() { Code = $"{nameof(Minion)}_delete", Description = "Delete Minions" },
-            new() { Code = $"{nameof(Minion)}_update", Description = "Update Minions" },
-            new() { Code = $"{nameof(Minion)}_hire", Description = "Hire Minions" },
-            new() { Code = $"{nameof(Job)}_create", Description = "Create Jobs" },
-            new() { Code = $"{nameof(Job)}_delete", Description = "Delete Jobs" }
+            new { Code = Privilege.PlayerView, Description = "View Players", Roles = new[] { "player", "admin" } },
+            new { Code = Privilege.PlayerEdit, Description = "Edit Players", Roles = new[] { "admin" } },
+            new { Code = Privilege.PlayerCreate, Description = "Create Players", Roles = new[] { "admin" } },
+            new { Code = Privilege.PlayerDelete, Description = "Delete Players", Roles = new[] { "admin" } },
+            new { Code = Privilege.MinionView, Description = "View Minions", Roles = new[] { "player", "admin" } },
+            new { Code = Privilege.MinionEdit, Description = "Edit Minions", Roles = new[] { "admin" } },
+            new { Code = Privilege.MinionCreate, Description = "Create Minions", Roles = new[] { "admin" } },
+            new { Code = Privilege.MinionDelete, Description = "Delete Minions", Roles = new[] { "admin" } },
+            new { Code = Privilege.MinionHire, Description = "Hire Minions", Roles = new[] { "player", "admin" } },
+            new { Code = Privilege.MinionFire, Description = "Fire Minions", Roles = new[] { "player", "admin" } },
+            new
+            {
+                Code = Privilege.MinionAssignJob, Description = "Assign Minions to Job",
+                Roles = new[] { "player", "admin" }
+            },
+            new { Code = Privilege.JobView, Description = "View Job", Roles = new[] { "player", "admin" } },
+            new { Code = Privilege.JobEdit, Description = "Edit Job", Roles = new[] { "admin" } },
+            new { Code = Privilege.JobCreate, Description = "Create Job", Roles = new[] { "admin" } },
+            new { Code = Privilege.JobDelete, Description = "Delete Job", Roles = new[] { "admin" } },
+            new { Code = Privilege.JobAccept, Description = "Accept Job", Roles = new[] { "player", "admin" } },
+            new { Code = Privilege.JobStart, Description = "Start Job", Roles = new[] { "player", "admin" } },
+            new { Code = Privilege.JobQuit, Description = "Quit Job", Roles = new[] { "player", "admin" } }
         };
         foreach (var privilege in privileges)
         {
-            if (context.Privileges.Any(p => p.Code == privilege.Code))
-                continue;
-            context.Privileges.Add(privilege);
+            var code = privilege.Code as string;
+            context.Privileges.FindOrCreate(p => p.Code == code,
+                () => new Privilege { Code = code, Description = privilege.Description });
         }
+
         context.SaveChanges();
 
-        var roles = new Role[]
+        var roles = new dynamic[]
         {
-            new() { Code = "player", Description = "Player"},
-            new() { Code = "admin", Description = "Administator" }
+            new { Code = "player", Description = "Player" },
+            new { Code = "admin", Description = "Administator" }
         };
-        foreach (var role in roles)
+        foreach (var r in roles)
         {
-            if (context.Roles.Any(r => r.Code == role.Code))
-                continue;
-            context.Roles.Add(role);
+            var code = r.Code as string;
+            var role = context.Roles.FirstOrDefault(r => r.Code == code);
+            if (role == null)
+            {
+                role = new Role { Code = code, Description = r.Description };
+                context.Roles.Add(role);
+            }
+
+            foreach (var p in privileges)
+            {
+                var privCode = p.Code as string;
+                if (p.Roles.Contains(role.Code))
+                {
+                    var privilege = context.Privileges.Find(privCode);
+                    role.Privileges.Add(privilege);
+                }
+            }
+
+            context.SaveChanges();
         }
+
+        context.SaveChanges();
     }
 }
