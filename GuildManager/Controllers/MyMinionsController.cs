@@ -51,7 +51,7 @@ public class MyMinionsController : AuthorizedController
 
     /// <summary>
     /// Removes a minion from the current players employ and puts them back in the pool of available minions.
-    /// Player cannot fire a minion that is currently on a Job.
+    /// Player cannot fire a minion that is currently on a Contract.
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>

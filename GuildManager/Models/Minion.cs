@@ -9,7 +9,7 @@ public class Minion : BaseEntity
     public Guid? BossId { get; set; }
     [JsonIgnore] public Player? Boss { get; set; }
 
-    [JsonIgnore] public ICollection<Job> Jobs { get; } = new List<Job>();
+    [JsonIgnore] public ICollection<Contract> Contracts { get; } = new List<Contract>();
 
-    public bool OnAJob() => Jobs.Count > 0;
+    public bool OnAJob() => Contracts.Count > 0;
 }

@@ -13,18 +13,18 @@ public class JobsController : AuthorizedController
     {
     }
 
-    // GET: api/Jobs
+    // GET: api/Contracts
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
+    public async Task<ActionResult<IEnumerable<Contract>>> GetJobs()
     {
-        return await Context.Jobs.Where(j => j.PatronId == null).ToListAsync();
+        return await Context.Contracts.Where(j => j.PatronId == null).ToListAsync();
     }
 
-    // GET: api/Jobs/5
+    // GET: api/Contracts/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Job>> GetJob(Guid id)
+    public async Task<ActionResult<Contract>> GetJob(Guid id)
     {
-        var job = await Context.Jobs.FindAsync(id);
+        var job = await Context.Contracts.FindAsync(id);
 
         if (job == null)
         {
@@ -34,17 +34,17 @@ public class JobsController : AuthorizedController
         return job;
     }
 
-    // PUT: api/Jobs/5
+    // PUT: api/Contracts/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutJob(Guid id, Job job)
+    public async Task<IActionResult> PutJob(Guid id, Contract contract)
     {
-        if (id != job.Id)
+        if (id != contract.Id)
         {
             return BadRequest();
         }
 
-        Context.Entry(job).State = EntityState.Modified;
+        Context.Entry(contract).State = EntityState.Modified;
 
         try
         {
@@ -65,28 +65,28 @@ public class JobsController : AuthorizedController
         return NoContent();
     }
 
-    // POST: api/Jobs
+    // POST: api/Contracts
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Job>> PostJob(Job job)
+    public async Task<ActionResult<Contract>> PostJob(Contract contract)
     {
-        Context.Jobs.Add(job);
+        Context.Contracts.Add(contract);
         await Context.SaveChangesAsync();
 
-        return CreatedAtAction("GetJob", new { id = job.Id }, job);
+        return CreatedAtAction("GetJob", new { id = contract.Id }, contract);
     }
 
-    // DELETE: api/Jobs/5
+    // DELETE: api/Contracts/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteJob(Guid id)
     {
-        var job = await Context.Jobs.FindAsync(id);
+        var job = await Context.Contracts.FindAsync(id);
         if (job == null)
         {
             return NotFound();
         }
 
-        Context.Jobs.Remove(job);
+        Context.Contracts.Remove(job);
         await Context.SaveChangesAsync();
 
         return NoContent();
@@ -94,6 +94,6 @@ public class JobsController : AuthorizedController
 
     private bool JobExists(Guid id)
     {
-        return (Context.Jobs?.Any(e => e.Id == id)).GetValueOrDefault();
+        return (Context.Contracts?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

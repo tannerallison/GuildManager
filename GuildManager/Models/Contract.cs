@@ -2,7 +2,7 @@
 
 namespace GuildManager.Models;
 
-public class Job : BaseEntity
+public class Contract : BaseEntity
 {
     public string Name { get; set; }
     public string Description { get; set; }

@@ -23,11 +23,11 @@ public class Privilege
     public const string PlayerCreate = nameof(Player) + "_create";
     public const string PlayerDelete = nameof(Player) + "_delete";
 
-    public const string JobView = nameof(Job) + "_view";
-    public const string JobEdit = nameof(Job) + "_edit";
-    public const string JobCreate = nameof(Job) + "_create";
-    public const string JobDelete = nameof(Job) + "_delete";
-    public const string JobAccept = nameof(Job) + "_accept";
-    public const string JobStart = nameof(Job) + "_start";
-    public const string JobQuit = nameof(Job) + "_quit";
+    public const string JobView = nameof(Contract) + "_view";
+    public const string JobEdit = nameof(Contract) + "_edit";
+    public const string JobCreate = nameof(Contract) + "_create";
+    public const string JobDelete = nameof(Contract) + "_delete";
+    public const string JobAccept = nameof(Contract) + "_accept";
+    public const string JobStart = nameof(Contract) + "_start";
+    public const string JobQuit = nameof(Contract) + "_quit";
 }
