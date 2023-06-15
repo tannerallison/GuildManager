@@ -33,7 +33,7 @@ public static class DbInitializer
 
         if (context.Players.Any())
             return;
-
+        
         var players = new AuthenticationRequest[]
         {
             new() { Username = "John", Password = "john" },

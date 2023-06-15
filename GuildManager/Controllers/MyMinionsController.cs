@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GuildManager.Controllers;
 
-// [Authorize]
 [Route("api/my/minions")]
 [ApiController]
 public class MyMinionsController : AuthorizedController
@@ -34,7 +33,7 @@ public class MyMinionsController : AuthorizedController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    // GET: api/Minion/5
+    // GET: api/my/minions/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Minion>> GetMinion(Guid id)
     {
@@ -55,19 +54,20 @@ public class MyMinionsController : AuthorizedController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    // GET: api/Minion/5
+    // GET: api/my/minions/5
+    [Authorize(Privilege.MinionFire)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> FireMinion(Guid id)
     {
         if (!TryGetPlayer(out var player))
             return new UnauthorizedResult();
 
-        var minion = player.Minions.FirstOrDefault(m => m.Id == id);
-        if (minion == null)
-            return new ForbidResult("Minion does not belong to player.");
+        var minion = Context.Minions.Find(id);
+        if (minion == null || minion.BossId != player.Id)
+            return NotFound();
 
         if (minion.OnAJob())
-            return new ForbidResult("Minion is currently on a job.");
+            return new ForbidResult("Cannot fire a minion that is currently on a contract.");
 
         minion.BossId = null;
         Context.Entry(minion).State = EntityState.Modified;

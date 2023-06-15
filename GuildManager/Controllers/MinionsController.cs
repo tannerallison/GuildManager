@@ -18,7 +18,7 @@ public class MinionsController : AuthorizedController
     /// Retrieves all minions that are not currently employed.
     /// </summary>
     /// <returns></returns>
-    // GET: api/Minions
+    // GET: api/minions
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Minion>>> GetMinions()
     {
@@ -30,7 +30,7 @@ public class MinionsController : AuthorizedController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    // GET: api/Minions/5
+    // GET: api/minions/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Minion>> GetMinion(int id)
     {
@@ -44,6 +44,43 @@ public class MinionsController : AuthorizedController
         return minion;
     }
 
+    /// <summary>
+    /// Creates a new minion.
+    /// </summary>
+    /// <param name="minion"></param>
+    /// <returns></returns>
+    // POST: api/minions
+    [Authorize(Privilege.MinionCreate)]
+    [HttpPost]
+    public async Task<ActionResult<Minion>> CreateMinion(Minion minion)
+    {
+        Context.Minions.Add(minion);
+        await Context.SaveChangesAsync();
+
+        return CreatedAtAction("GetMinion", new { id = minion.Id }, minion);
+    }
+
+    /// <summary>
+    /// Deletes a minion.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    // DELETE: api/minions/:id
+    [Authorize(Privilege.MinionDelete)]
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteMinion(Guid id)
+    {
+        var minion = await Context.Minions.FindAsync(id);
+        if (minion == null)
+        {
+            return NotFound();
+        }
+
+        Context.Minions.Remove(minion);
+        await Context.SaveChangesAsync();
+
+        return NoContent();
+    }
 
     // PATCH: api/Minions/5/hire
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -51,12 +88,14 @@ public class MinionsController : AuthorizedController
     [HttpPatch("{id}/hire")]
     public async Task<IActionResult> HireMinion(Guid id)
     {
-        var player = Request.HttpContext.Items["Player"] as Player;
-        var minion = Context.Minions.First(m => m.Id == id);
+        if (!TryGetPlayer(out var player))
+            return Unauthorized();
+
+        var minion = await Context.Minions.FindAsync(id);
+        if (minion == null)
+            return NotFound();
         if (minion.BossId.HasValue)
-        {
-            return Conflict();
-        }
+            return Conflict("Minion is already employed.");
 
         minion.BossId = player.Id;
         Context.Entry(minion).State = EntityState.Modified;

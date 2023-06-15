@@ -2,5 +2,6 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2b91e0a8_002D34c7_002D4099_002Dbdec_002D5a27c5480a22/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="GetMinions_WithAuthorizedUser_ReturnsMinions" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::D430D22C-F48D-4DB1-9B1A-35090A5E6CC3::net7.0::GuildManager.Tests.Tests.GetMinions_WithAuthorizedUser_ReturnsMinions&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::D430D22C-F48D-4DB1-9B1A-35090A5E6CC3::net7.0::GuildManager.Tests.PlayerTest.GetPlayersReturnsAllPlayers&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

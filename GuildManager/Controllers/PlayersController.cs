@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GuildManager.Data;
 using GuildManager.Models;
+using GuildManager.Utilities;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GuildManager.Controllers;
@@ -14,19 +15,21 @@ public class PlayersController : AuthorizedController
     {
     }
 
-    // GET: api/Players
+    /// <summary>
+    /// GET: api/Players
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Player>>> GetPlayers()
     {
-        if (Context.Players == null)
-        {
-            return NotFound();
-        }
-
         return await Context.Players.ToListAsync();
     }
 
-    // GET: api/Players/5
+    /// <summary>
+    /// GET: api/Players/5
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<Player>> GetPlayer(Guid id)
     {
@@ -45,83 +48,34 @@ public class PlayersController : AuthorizedController
         return player;
     }
 
-    // PUT: api/Players/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutPlayer(Guid id, Player player)
-    {
-        if (id != player.Id)
-        {
-            return BadRequest();
-        }
-
-        Context.Entry(player).State = EntityState.Modified;
-
-        try
-        {
-            await Context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!PlayerExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
-    }
-
-    // POST: api/Players
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// POST: api/Players
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
     [HttpPost]
-    public async Task<ActionResult<Player>> PostPlayer(string username)
+    public async Task<ActionResult<Player>> PostPlayer(PlayerRegisterDTO player)
     {
-        if (Context.Players == null)
-        {
-            return Problem("Entity set 'GMContext.Players'  is null.");
-        }
-
-        if (username.IsNullOrEmpty())
-        {
+        if (player.Username.IsNullOrEmpty())
             return Problem("Username is required");
-        }
+        if (player.Password.IsNullOrEmpty())
+            return Problem("Password is required");
 
-        if (Context.Players.Any(p => p.Username == username))
+        if (Context.Players.Any(p => p.Username == player.Username))
         {
             return Problem("Username is already taken");
         }
 
-        var player = new Player { Username = username };
-        Context.Players.Add(player);
+        var dbPlayer = new Player
+        {
+            Username = player.Username,
+            PasswordHash = new PasswordHash(player.Password).ToArray()
+        };
+
+        Context.Players.Add(dbPlayer);
         await Context.SaveChangesAsync();
 
-        return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
-    }
-
-    // DELETE: api/Players/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePlayer(int id)
-    {
-        if (Context.Players == null)
-        {
-            return NotFound();
-        }
-
-        var player = await Context.Players.FindAsync(id);
-        if (player == null)
-        {
-            return NotFound();
-        }
-
-        Context.Players.Remove(player);
-        await Context.SaveChangesAsync();
-
-        return NoContent();
+        return CreatedAtAction("GetPlayer", new { id = dbPlayer.Id }, dbPlayer);
     }
 
     private bool PlayerExists(Guid id)
