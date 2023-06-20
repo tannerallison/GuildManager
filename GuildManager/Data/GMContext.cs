@@ -5,11 +5,15 @@ namespace GuildManager.Data;
 
 public class GMContext : DbContext
 {
-    public DbSet<Minion> Minions { get; set; }
-    public DbSet<Contract> Contracts { get; set; }
-    public DbSet<Player> Players { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<Privilege> Privileges { get; set; }
+    public DbSet<Minion> Minions { get; set; } = null!;
+    public DbSet<Contract> Contracts { get; set; } = null!;
+    public DbSet<Player> Players { get; set; } = null!;
+    public DbSet<Role> Roles { get; set; } = null!;
+    public DbSet<Privilege> Privileges { get; set; } = null!;
+
+    public GMContext()
+    {
+    }
 
     public GMContext(DbContextOptions options) : base(options)
     {

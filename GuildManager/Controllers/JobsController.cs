@@ -1,15 +1,15 @@
+using GuildManager.DAL;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GuildManager.Data;
 using GuildManager.Models;
+using GuildManager.Utilities;
 
 namespace GuildManager.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class JobsController : AuthorizedController
+public class JobsController : GenericController<Contract>
 {
-    public JobsController(GMContext context) : base(context)
+    public JobsController(IUnitOfWork context) : base(context)
     {
     }
 
@@ -17,14 +17,15 @@ public class JobsController : AuthorizedController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Contract>>> GetJobs()
     {
-        return await Context.Contracts.Where(j => j.PatronId == null).ToListAsync();
+        return Ok(await Repository.Get(c => c.PatronId == null));
     }
+
 
     // GET: api/Contracts/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Contract>> GetJob(Guid id)
     {
-        var job = await Context.Contracts.FindAsync(id);
+        var job = await Repository.GetById(id);
 
         if (job == null)
         {
@@ -34,35 +35,35 @@ public class JobsController : AuthorizedController
         return job;
     }
 
-    // PUT: api/Contracts/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutJob(Guid id, Contract contract)
+    [HttpPost("{id}/accept")]
+    [Authorize(Privilege.JobAccept)]
+    public async Task<ActionResult<Contract>> AcceptContract([FromRoute] Guid id)
     {
-        if (id != contract.Id)
+        var taskOut = Task.WhenAll(GetEntityAsync(id), GetPlayerAsync());
+
+        if (!TryGetPlayer(out var player))
         {
-            return BadRequest();
+            return Unauthorized();
         }
 
-        Context.Entry(contract).State = EntityState.Modified;
-
-        try
+        var contract = await GetEntityAsync(id);
+        if (contract == null)
         {
-            await Context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!JobExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
+            return NotFound();
         }
 
-        return NoContent();
+        if (contract.PatronId != null)
+        {
+            return Forbid("This contract has already been accepted.");
+        }
+
+        contract.PatronId = player.Id;
+
+        await Repository.Update(contract);
+
+        await UnitOfWork.SaveAsync();
+
+        return CreatedAtAction(nameof(GetJob), new { id = contract.Id }, contract);
     }
 
     // POST: api/Contracts
@@ -70,30 +71,26 @@ public class JobsController : AuthorizedController
     [HttpPost]
     public async Task<ActionResult<Contract>> PostJob(Contract contract)
     {
-        Context.Contracts.Add(contract);
-        await Context.SaveChangesAsync();
+        await Repository.Create(contract)
+            .ContinueWith(t => UnitOfWork.SaveAsync());
 
-        return CreatedAtAction("GetJob", new { id = contract.Id }, contract);
+        return CreatedAtAction(nameof(GetJob), new { id = contract.Id }, contract);
     }
 
     // DELETE: api/Contracts/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteJob(Guid id)
     {
-        var job = await Context.Contracts.FindAsync(id);
+        var repository = Repository;
+        var job = await repository.GetById(id);
         if (job == null)
         {
             return NotFound();
         }
 
-        Context.Contracts.Remove(job);
-        await Context.SaveChangesAsync();
+        await repository.Delete(id);
+        await UnitOfWork.SaveAsync();
 
         return NoContent();
-    }
-
-    private bool JobExists(Guid id)
-    {
-        return (Context.Contracts?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

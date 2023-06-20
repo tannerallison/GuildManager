@@ -21,7 +21,7 @@ public class PlayerTest : BaseUnitTest
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _mockContext = new Mock<GMContext>(options);
-        _controller = new PlayersController(_mockContext.Object);
+        // _controller = new PlayersController(_mockContext.Object);
     }
 
     [Test]

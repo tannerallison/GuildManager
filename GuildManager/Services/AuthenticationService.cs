@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using GuildManager.Controllers;
 using GuildManager.Data;
 using GuildManager.Models;
 using GuildManager.Utilities;

@@ -1,16 +1,16 @@
-﻿using GuildManager.Data;
+﻿using System.Data;
+using GuildManager.DAL;
 using GuildManager.Models;
 using GuildManager.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GuildManager.Controllers;
 
 [Route("api/my/minions")]
 [ApiController]
-public class MyMinionsController : AuthorizedController
+public class MyMinionsController : GenericController<Minion>
 {
-    public MyMinionsController(GMContext context) : base(context)
+    public MyMinionsController(IUnitOfWork context) : base(context)
     {
     }
 
@@ -25,7 +25,8 @@ public class MyMinionsController : AuthorizedController
         if (!TryGetPlayer(out var player))
             return new UnauthorizedResult();
 
-        return await Context.Minions.Where(m => m.BossId == player.Id).ToListAsync();
+        var minions = await Repository.Get(m => m.BossId == player.Id);
+        return Ok(minions);
     }
 
     /// <summary>
@@ -40,9 +41,9 @@ public class MyMinionsController : AuthorizedController
         if (!TryGetPlayer(out var player))
             return new UnauthorizedResult();
 
-        var minion = await Context.Minions.FirstAsync<Minion?>(c => c.BossId == player.Id && c.Id == id);
+        var minion = await Repository.GetById(id);
 
-        if (minion == null)
+        if (minion == null || minion.BossId != player.Id)
             return NotFound();
 
         return minion;
@@ -62,7 +63,7 @@ public class MyMinionsController : AuthorizedController
         if (!TryGetPlayer(out var player))
             return new UnauthorizedResult();
 
-        var minion = Context.Minions.Find(id);
+        var minion = await Repository.GetById(id);
         if (minion == null || minion.BossId != player.Id)
             return NotFound();
 
@@ -70,24 +71,19 @@ public class MyMinionsController : AuthorizedController
             return new ForbidResult("Cannot fire a minion that is currently on a contract.");
 
         minion.BossId = null;
-        Context.Entry(minion).State = EntityState.Modified;
+        await Repository.Update(minion);
         try
         {
-            await Context.SaveChangesAsync();
+            await UnitOfWork.SaveAsync();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DataException)
         {
-            if (!MinionExists(id))
+            if (!EntityExists(id))
                 return NotFound();
 
             throw;
         }
 
         return new OkResult();
-    }
-
-    private bool MinionExists(Guid id)
-    {
-        return (Context.Minions?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

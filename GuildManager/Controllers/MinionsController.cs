@@ -1,6 +1,6 @@
+using System.Data;
+using GuildManager.DAL;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GuildManager.Data;
 using GuildManager.Models;
 using GuildManager.Utilities;
 
@@ -8,9 +8,9 @@ namespace GuildManager.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class MinionsController : AuthorizedController
+public class MinionsController : GenericController<Minion>
 {
-    public MinionsController(GMContext context) : base(context)
+    public MinionsController(IUnitOfWork context) : base(context)
     {
     }
 
@@ -22,7 +22,7 @@ public class MinionsController : AuthorizedController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Minion>>> GetMinions()
     {
-        return await Context.Minions.Where(m => m.BossId == null).ToListAsync();
+        return Ok(await UnitOfWork.GetRepository<Minion>().Get(m => m.BossId == null));
     }
 
     /// <summary>
@@ -32,9 +32,9 @@ public class MinionsController : AuthorizedController
     /// <returns></returns>
     // GET: api/minions/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Minion>> GetMinion(int id)
+    public async Task<ActionResult<Minion>> GetMinion(Guid id)
     {
-        var minion = await Context.Minions.FindAsync(id);
+        var minion = await UnitOfWork.GetRepository<Minion>().GetById(id);
 
         if (minion == null)
         {
@@ -54,10 +54,10 @@ public class MinionsController : AuthorizedController
     [HttpPost]
     public async Task<ActionResult<Minion>> CreateMinion(Minion minion)
     {
-        Context.Minions.Add(minion);
-        await Context.SaveChangesAsync();
+        await UnitOfWork.GetRepository<Minion>().Create(minion);
+        await UnitOfWork.SaveAsync();
 
-        return CreatedAtAction("GetMinion", new { id = minion.Id }, minion);
+        return CreatedAtAction(nameof(GetMinion), new { id = minion.Id }, minion);
     }
 
     /// <summary>
@@ -70,14 +70,14 @@ public class MinionsController : AuthorizedController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteMinion(Guid id)
     {
-        var minion = await Context.Minions.FindAsync(id);
+        var minion = await UnitOfWork.GetRepository<Minion>().GetById(id);
         if (minion == null)
         {
             return NotFound();
         }
 
-        Context.Minions.Remove(minion);
-        await Context.SaveChangesAsync();
+        await UnitOfWork.GetRepository<Minion>().Delete(id);
+        await UnitOfWork.SaveAsync();
 
         return NoContent();
     }
@@ -91,32 +91,26 @@ public class MinionsController : AuthorizedController
         if (!TryGetPlayer(out var player))
             return Unauthorized();
 
-        var minion = await Context.Minions.FindAsync(id);
+        var minion = await UnitOfWork.GetRepository<Minion>().GetById(id);
         if (minion == null)
             return NotFound();
         if (minion.BossId.HasValue)
             return Conflict("Minion is already employed.");
 
         minion.BossId = player.Id;
-        Context.Entry(minion).State = EntityState.Modified;
+        await UnitOfWork.GetRepository<Minion>().Update(minion);
 
         try
         {
-            await Context.SaveChangesAsync();
+            await UnitOfWork.SaveAsync();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DataException)
         {
-            if (!MinionExists(id))
-                return NotFound();
-
-            throw;
+            ModelState.AddModelError("", "Unable to save changes. " +
+                                         "Try again, and if the problem persists, " +
+                                         "see your system administrator.");
         }
 
         return new OkResult();
-    }
-
-    private bool MinionExists(Guid id)
-    {
-        return (Context.Minions?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

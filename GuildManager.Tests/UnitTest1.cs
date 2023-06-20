@@ -1,11 +1,10 @@
+using System.Linq.Expressions;
 using System.Security.Claims;
 using GuildManager.Controllers;
-using GuildManager.Data;
+using GuildManager.DAL;
 using GuildManager.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MockQueryable.Moq;
 using Moq;
 
 namespace GuildManager.Tests;
@@ -13,16 +12,16 @@ namespace GuildManager.Tests;
 public class Tests
 {
     private MyMinionsController _controller;
-    private Mock<GMContext> _mockContext;
+    private Mock<IUnitOfWork> _mockUnitOfWork;
+    private Mock<IRepository<Minion>> _mockMinionRepository;
 
     [SetUp]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<GMContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _mockContext = new Mock<GMContext>(options);
-        _controller = new MyMinionsController(_mockContext.Object);
+        _mockMinionRepository = new Mock<IRepository<Minion>>();
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
+        _mockUnitOfWork.Setup(u => u.GetRepository<Minion>()).Returns(_mockMinionRepository.Object);
+        _controller = new MyMinionsController(_mockUnitOfWork.Object);
     }
 
     [Test]
@@ -32,25 +31,24 @@ public class Tests
         var player = new Player();
         _controller.ControllerContext = new ControllerContext();
         _controller.ControllerContext.HttpContext = new DefaultHttpContext();
-        _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(ClaimTypes.Name, "username"),
-            new Claim(ClaimTypes.NameIdentifier, player.Id.ToString())
-        }, "mock"));
+        _controller.ControllerContext.HttpContext.Items["Player"] = player;
 
         var minions = new List<Minion>
         {
             new() { BossId = player.Id },
             new() { BossId = player.Id }
         };
-        var mockDbSet = minions.AsQueryable().BuildMockDbSet();
 
-        _mockContext.SetupProperty(c => c.Minions, mockDbSet.Object);
+        _mockMinionRepository
+            .Setup(r => r.Get(It.IsAny<Expression<Func<Minion, bool>>>(), null, ""))
+            .ReturnsAsync(minions)
+            .Verifiable("Get was not called");
 
         // Act
         var result = await _controller.GetMinions();
 
         // Assert
+        _mockMinionRepository.Verify();
         Assert.IsInstanceOf<OkObjectResult>(result.Result);
         var okResult = result.Result as OkObjectResult;
         var resultList = okResult.Value as List<Minion>;

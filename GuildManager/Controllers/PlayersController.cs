@@ -1,17 +1,15 @@
+using GuildManager.DAL;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GuildManager.Data;
 using GuildManager.Models;
 using GuildManager.Utilities;
-using Microsoft.IdentityModel.Tokens;
 
 namespace GuildManager.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlayersController : AuthorizedController
+public class PlayersController : GenericController<Player>
 {
-    public PlayersController(GMContext context) : base(context)
+    public PlayersController(IUnitOfWork context) : base(context)
     {
     }
 
@@ -22,7 +20,8 @@ public class PlayersController : AuthorizedController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Player>>> GetPlayers()
     {
-        return await Context.Players.ToListAsync();
+        var players = await Repository.Get();
+        return Ok(players);
     }
 
     /// <summary>
@@ -33,12 +32,7 @@ public class PlayersController : AuthorizedController
     [HttpGet("{id}")]
     public async Task<ActionResult<Player>> GetPlayer(Guid id)
     {
-        if (Context.Players == null)
-        {
-            return NotFound();
-        }
-
-        var player = await Context.Players.FindAsync(id);
+        var player = await Repository.GetById(id);
 
         if (player == null)
         {
@@ -56,12 +50,13 @@ public class PlayersController : AuthorizedController
     [HttpPost]
     public async Task<ActionResult<Player>> PostPlayer(PlayerRegisterDTO player)
     {
-        if (player.Username.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(player.Username))
             return Problem("Username is required");
-        if (player.Password.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(player.Password))
             return Problem("Password is required");
 
-        if (Context.Players.Any(p => p.Username == player.Username))
+        var foundPlayer = await Repository.Get(filter: p => p.Username == player.Username);
+        if (foundPlayer.Any())
         {
             return Problem("Username is already taken");
         }
@@ -72,14 +67,9 @@ public class PlayersController : AuthorizedController
             PasswordHash = new PasswordHash(player.Password).ToArray()
         };
 
-        Context.Players.Add(dbPlayer);
-        await Context.SaveChangesAsync();
+        await Repository.Create(dbPlayer);
+        await UnitOfWork.SaveAsync();
 
         return CreatedAtAction("GetPlayer", new { id = dbPlayer.Id }, dbPlayer);
-    }
-
-    private bool PlayerExists(Guid id)
-    {
-        return (Context.Players?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }
